@@ -1,6 +1,11 @@
 create database fresh_market_db;
 use fresh_market_db;
 
+CREATE TABLE login(
+	name varchar(30) PRIMARY KEY,
+    password varchar(30) NOT NULL
+);
+
 CREATE TABLE product_type (
   type_id INT PRIMARY KEY,
   name VARCHAR(255) unique,
@@ -85,6 +90,15 @@ CREATE TABLE orders (
   UNIQUE(customer_id, store_id, date),
   FOREIGN KEY (customer_id) REFERENCES customer(customer_id) ON UPDATE CASCADE ON DELETE RESTRICT,
   FOREIGN KEY (store_id) REFERENCES store(store_id) ON UPDATE CASCADE ON DELETE RESTRICT
+);
+
+CREATE TABLE order_products (
+ order_id INT NOT NULL,
+ product_id INT NOT NULL,
+ product_quantity INT NOT NULL,
+ PRIMARY KEY (order_id, product_id),
+ FOREIGN KEY (order_id) REFERENCES orders(order_id) ON UPDATE CASCADE ON DELETE RESTRICT,
+ FOREIGN KEY (product_id) REFERENCES product(product_id) ON UPDATE CASCADE ON DELETE RESTRICT
 );
 
 CREATE TABLE freight_truck (
