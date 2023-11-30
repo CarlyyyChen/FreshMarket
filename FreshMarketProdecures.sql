@@ -32,36 +32,42 @@ delimiter ;
 
 -- add new order
 DELIMITER $$
+
 CREATE PROCEDURE new_order(
+    IN orderID INT,
     IN orderDate DATE,
     IN custID INT,
     IN storeID INT,
     IN prodName VARCHAR(255),
-    IN prodQuantity INT
+    IN prodQuantity INT,
+    OUT message VARCHAR(255)
 )
 BEGIN
-    DECLARE newOrderID INT;
+    DECLARE existingOrder INT;
     DECLARE prodID INT;
+    
+    -- Check if the orderID exists
+    SELECT COUNT(*) INTO existingOrder FROM orders WHERE order_id = orderID;
 
-    -- Find the product ID based on the product name
-    SELECT product_id INTO prodID FROM product WHERE name = prodName LIMIT 1;
+    -- If order does not exist, insert a new order
+    IF existingOrder = 0 THEN
+        INSERT INTO orders(order_id, date, status, customer_id, store_id) 
+        VALUES (orderID, orderDate, 'new', custID, storeID);
+    END IF;
 
-    -- Insert into orders table
-    INSERT INTO orders(date, customer_id, store_id)
-    VALUES (orderDate, custID, storeID);
+    -- Get product_id from product name
+    SELECT product_id INTO prodID FROM product WHERE name = prodName;
 
-    -- Get the ID of the newly inserted order
-    SET newOrderID = LAST_INSERT_ID();
+    -- Check if product exists
+    IF prodID IS NOT NULL THEN
+        -- Insert into order_products table
+        INSERT INTO order_products(order_id, product_id, product_quantity) 
+        VALUES (orderID, prodID, prodQuantity)
+        ON DUPLICATE KEY UPDATE product_quantity = product_quantity + prodQuantity;
 
-    -- Insert into order_products table
-    INSERT INTO order_products(order_id, product_id, product_quantity)
-    VALUES (newOrderID, prodID, prodQuantity);
-
-    -- Check for successful insertion and return a message
-    IF ROW_COUNT() > 0 THEN
-        SELECT 'Successfully received a new order' AS message;
+        SET message = 'Successfully received a new order';
     ELSE
-        SELECT 'Failed to receive new order' AS message;
+        SET message = 'Failed to receive new order';
     END IF;
 END$$
 
