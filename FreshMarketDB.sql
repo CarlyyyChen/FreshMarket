@@ -6,11 +6,22 @@ CREATE TABLE login(
     password varchar(30) NOT NULL
 );
 
+Insert into login(name, password) values("user1","111111");
+Insert into login(name, password) values("user2","222222");
+
 CREATE TABLE product_type (
   type_id INT PRIMARY KEY,
   name VARCHAR(255) unique,
   unit VARCHAR(255)
 );
+
+Insert into product_type(type_id, name, unit) values("1","Produce","lb");
+Insert into product_type(type_id, name, unit) values("2","Meat","lb");
+Insert into product_type(type_id, name, unit) values("3","Seafood","lb");
+Insert into product_type(type_id, name, unit) values("4","Deli","box");
+Insert into product_type(type_id, name, unit) values("5","Dairy","box");
+Insert into product_type(type_id, name, unit) values("6","Beverage","bottle");
+Insert into product_type(type_id, name, unit) values("7","Bakery","box");
 
 CREATE TABLE supplier (
   supplier_id INT PRIMARY KEY,
@@ -19,6 +30,8 @@ CREATE TABLE supplier (
   state_abbreviation VARCHAR(2),
   zip_code VARCHAR(10)
 );
+
+Insert into supplier(supplier_id, street_number, street_name, state_abbreviation, zip_code) values("1","","","","");
 
 CREATE TABLE product (
   product_id INT PRIMARY KEY,
