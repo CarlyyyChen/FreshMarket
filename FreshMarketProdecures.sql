@@ -22,7 +22,7 @@ delimiter ;
 delimiter $$
 create procedure login(username_p varchar(30), pwd_p varchar(30))
 begin
-	if not exists (select 1 from login where username = username_p and password = pwd_p) then
+	if not exists (select 1 from login where name = username_p and password = pwd_p) then
         signal sqlstate '45000' set message_text = "Invalid username or password";
     else
 		select "successfully logged in";
@@ -76,7 +76,7 @@ DELIMITER ;
 -- fill new order
 DELIMITER $$
 
-CREATE PROCEDURE fill_order(
+CREATE PROCEDURE prepare_order(
     IN inputOrderID INT
 )
 BEGIN
