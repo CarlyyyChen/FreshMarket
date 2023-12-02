@@ -310,6 +310,26 @@ END$$
 
 DELIMITER ;
 
+-- retire (delete) an employee
+DELIMITER $$
+
+CREATE PROCEDURE retire_employee(
+    IN inputStaffID INT
+)
+BEGIN
+    -- Check if the employee is a manager
+    IF EXISTS (SELECT * FROM manager WHERE staff_id = inputStaffID) THEN
+        -- Delete the employee from the manager table
+        DELETE FROM manager WHERE staff_id = inputStaffID;
+    END IF;
+
+    -- Delete the employee from the employee table
+    DELETE FROM employee WHERE staff_id = inputStaffID;
+END$$
+
+DELIMITER ;
+
+
 -- bonus: display all products and quantities in different stores under different types 
 DELIMITER $$
 
