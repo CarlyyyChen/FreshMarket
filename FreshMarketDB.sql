@@ -236,7 +236,7 @@ Insert into manager (staff_id, start_date, store_id) values ("10003","2001-05-01
 Insert into manager (staff_id, start_date, store_id) values ("10005","2002-02-01","3");
 
 CREATE TABLE customer (
-  customer_id INT PRIMARY KEY,
+  customer_id INT PRIMARY KEY AUTO_INCREMENT,
   first_name VARCHAR(255) NOT NULL,
   last_name VARCHAR(255) NOT NULL,
   address VARCHAR(255),
