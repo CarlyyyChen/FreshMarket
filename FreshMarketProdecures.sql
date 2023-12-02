@@ -164,22 +164,16 @@ DELIMITER ;
 DELIMITER $$
 
 CREATE PROCEDURE order_from_supplier(
-    IN inputSupplierName VARCHAR(255),
+    IN inputSupplierID INT,
     IN inputStoreID INT,
     IN inputProductName VARCHAR(255),
     IN inputQuantity INT,
     IN inputProductTypeName VARCHAR(255)
 )
 BEGIN
-    DECLARE supplierID INT;
     DECLARE productID INT;
     DECLARE currentQuantity INT;
     DECLARE newQuantity INT;
-
-    -- Get supplier_id for the input supplier name
-    SELECT supplier_id INTO supplierID
-    FROM supplier
-    WHERE supplier_name = inputSupplierName;
 
     -- Get product_id for the input product name
     SELECT product_id INTO productID
@@ -189,7 +183,7 @@ BEGIN
     -- Check if the supplier can supply the product to the store
     IF EXISTS (SELECT * 
                FROM store_suppliers
-               WHERE store_id = inputStoreID AND supplier_id = supplierID AND product_id = productID) THEN
+               WHERE store_id = inputStoreID AND supplier_id = inputSupplierID AND product_id = productID) THEN
 
         -- Check if the product already exists in the inventory for the store
         SELECT quantity INTO currentQuantity
