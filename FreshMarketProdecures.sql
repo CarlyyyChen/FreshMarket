@@ -184,7 +184,7 @@ BEGIN
     -- Get product_id for the input product name
     SELECT product_id INTO productID
     FROM product
-    WHERE product_name = inputProductName;
+    WHERE name = inputProductName;
 
     -- Check if the supplier can supply the product to the store
     IF EXISTS (SELECT * 
