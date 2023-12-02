@@ -11,7 +11,7 @@ def register():
         password = request.form.get("password")
         conn = pymysql.connect(host='localhost',
                                user='root',
-                               password='wywWYW2218',
+                               password='123456',
                                database='fresh_market_db',
                                cursorclass=pymysql.cursors.Cursor)
         with conn:
@@ -42,7 +42,7 @@ def login():
 def prepare_order():
     conn = pymysql.connect(host='localhost',
                            user='root',
-                           password='wywWYW2218',
+                           password='123456',
                            database='fresh_market_db',
                            cursorclass=pymysql.cursors.DictCursor)
     try:
@@ -79,7 +79,7 @@ def customer_feedback():
         inputDate = request.form.get('date')  # 'YYYY-MM-DD'
         conn = pymysql.connect(host='localhost',
                                user='root',
-                               password='wywWYW2218',
+                               password='123456',
                                database='fresh_market_db',
                                cursorclass=pymysql.cursors.DictCursor)
         try:
@@ -110,7 +110,7 @@ def register_new_customer():
 
         conn = pymysql.connect(host='localhost',
                                user='root',
-                               password='wywWYW2218',
+                               password='123456',
                                database='fresh_market_db',
                                cursorclass=pymysql.cursors.DictCursor)
         try:
