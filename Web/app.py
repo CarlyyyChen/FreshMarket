@@ -137,5 +137,6 @@ def register_new_customer():
         return render_template('register_new_customer.html')
 
 
+
 if __name__ == '__main__':
     app.run()
