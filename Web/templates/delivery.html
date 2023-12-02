@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style/neworder.css') }}">
+    <title>Fresh Market</title>
+</head>
+<body>
+    <div class="container">
+        <table class="bordered">
+             <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Truck License No.</th>
+                </tr>
+            </thead>
+            <tbody id="inputContainer1">
+                <tr class="inputLine1">
+                    <td>
+                        <label for="store_dropdown"></label>
+                        <select class="dropdown" name="order_dropdown"></select>
+                    </td>
+                    <td>
+                        <label for="customer_dropdown"></label>
+                        <select class="dropdown" name="truck_dropdown"></select>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <button type="submit" onclick="assignDelivery()">Confirm</button>
+    </div>
+    <script>
+        function fetchIDs(line) {
+            var order_dropdown = line.querySelector('.dropdown[name="order_dropdown"]');
+            var truck_dropdown = line.querySelector('.dropdown[name="truck_dropdown"]');
+
+            fetch('/get_order_id')
+                .then(response => response.json())
+                .then(data => {
+                    var option = document.createElement('option');
+                    option.value = '0';
+                    option.text = "Select a new order";
+                    order_dropdown.add(option);
+                    data.forEach(function(item) {
+                        var option = document.createElement('option');
+                        option.value = item.order_id;
+                        option.text = item.order_id;
+                        order_dropdown.add(option);
+                    });
+                })
+            fetch('/get_truck_id')
+                .then(response => response.json())
+                .then(data => {
+                    var option = document.createElement('option');
+                    option.value = '0';
+                    option.text = "Select an available truck";
+                    truck_dropdown.add(option);
+                    data.forEach(function(item) {
+                        var option = document.createElement('option');
+                        option.value = item.license_plate;
+                        option.text = item.license_plate;
+                        truck_dropdown.add(option);
+                    });
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function assignDelivery() {
+            var lines = [];
+            var orderInputLines = document.querySelectorAll('.inputLine1');
+            orderInputLines.forEach(function(line) {
+                var orderId = line.querySelector('.dropdown[name="order_dropdown"]').value;
+                var truckId = line.querySelector('.dropdown[name="truck_dropdown"]').value;
+
+
+                if (orderId && truckId) {
+                    lines.push({
+                        order_id: orderId,
+                        truck_id: truckId,
+                    });
+                }
+            });
+            fetch('/assign_delivery', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ lines: lines })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        fetchIDs(document.querySelector('.inputLine1'));
+    </script>
+
+</body>
+</html>

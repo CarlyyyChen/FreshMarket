@@ -21,24 +21,75 @@ body {
     text-decoration: none;
     border-radius: 4px;
   }
-  
+
   .back-button:hover {
     background-color: #45a049;
-  }  
-  
+  }
+
   .container {
-    max-width: 400px;
+    width: 1000px;
     margin: 100px auto;
     background-color: #fff;
+    font-family: "trebuchet MS","Lucida sans","Arial";
+    font-size: 14px;
     padding: 20px;
     border-radius: 5px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   }
-  
+
+table {
+  *border-collapse: collapse;
+  width: 80%;
+  margin: 20px auto;
+  }
+  .bordered {
+    border: solid #ccc 1px;
+    border-radius: 6px;
+    box-shadow: 0 1px 1px #ccc;
+  }
+  .borderd tr {
+    -o-transition: all 0.1s ease-in-out;
+    -webkit-transition: all 0.1s ease-in-out;
+    -moz-transition: all 0.1s ease-in-out;
+    -ms-transition: all 0.1s ease-in-out;
+    transition: all 0.1s ease-in-out;
+  }
+  .bordered .highlight,
+  .bordered tr:hover {
+    background: #fbf8e9;/*表格行的悬浮状态效果*/
+  }
+  .bordered td,
+  .bordered th {
+    border-left: 1px solid #ccc;
+    border-top: 1px solid #ccc;
+    padding: 10px;
+    text-align: left;
+  }
+  .bordered th {
+      /*表格表头添加渐变背景色*/
+    background-color: #dce9f9;
+    background-image: -webkit-gradient(linear, left top, left bottom, from(#ebf3fc), to(#dce9f9));
+    background-image: -webkit-linear-gradient(top, #ebf3fc, #dce9f9);
+    background-image: -moz-linear-gradient(top, #ebf3fc, #dce9f9);
+    background-image: -ms-linear-gradient(top, #ebf3fc, #dce9f9);
+    background-image: -o-linear-gradient(top, #ebf3fc, #dce9f9);
+    background-image: linear-gradient(top, #ebf3fc, #dce9f9);
+    filter: progid:DXImageTransform.Microsoft.gradient(GradientType=0, startColorstr=#ebf3fc, endColorstr=#dce9f9);
+    -ms-filter: "progid:DXImageTransform.Microsoft.gradient (GradientType=0, startColorstr=#ebf3fc, endColorstr=#dce9f9)";
+    box-shadow: 0 1px 0 rgba(255,255,255,.8) inset;/*表格表头设置内阴影*/
+    border-top: none;
+    text-shadow: 0 1px 0 rgba(255,255,255,.5);/*表格表头设置文字阴影*/
+  }
+  /*使用:first-child去除表格每行的第一个单元格的左边框*/
+  .bordered td:first-child,
+  .bordered th:first-child {
+    border-left: none;
+  }
+
   h1 {
     text-align: center;
   }
-  
+
   input[type="text"],
   input[type="email"],
   input[type="number"],
@@ -51,7 +102,7 @@ body {
     box-sizing: border-box;
     border-radius: 4px;
   }
-  
+
   input[type="submit"] {
     background-color: #4CAF50;
     color: white;
@@ -59,10 +110,10 @@ body {
     margin: 8px 0;
     border: none;
     cursor: pointer;
-    width: 100%;
+    width: 50%;
     border-radius: 4px;
   }
-  
+
   input[type="submit"]:hover {
     background-color: orange;
   }
@@ -81,7 +132,7 @@ body {
   button[type="submit"]:hover {
     background-color: orange;
   }
-  
+
   img {
     display: block;
     margin-left: auto;
@@ -93,7 +144,7 @@ body {
     text-align: center;
     font-size: 12px;
   }
-  
+
   .footer-bottom p {
     color: #999;
   }
@@ -113,27 +164,4 @@ body {
 
   .a-link:hover {
     color: orange;
-  }
-  
-/* Media Query for smaller screens */
-@media (max-width: 600px) {
-    .container {
-      margin: 50px auto;
-      padding: 10px;
-    }
-    
-    h1 {
-      font-size: 24px;
-    }
-    
-    input[type="text"],
-    input[type="password"] {
-      padding: 8px 16px;
-      font-size: 14px;
-    }
-    
-    button {
-      padding: 12px 16px;
-      font-size: 16px;
-    }
   }
