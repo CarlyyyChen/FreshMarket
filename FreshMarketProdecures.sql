@@ -171,14 +171,20 @@ CREATE PROCEDURE order_from_supplier(
     IN inputProductTypeName VARCHAR(255)
 )
 BEGIN
+    DECLARE typeID INT;
     DECLARE productID INT;
     DECLARE currentQuantity INT;
     DECLARE newQuantity INT;
+    
+    -- Get product type id
+    SELECT type_id into typeID
+    FROM product_type
+    WHERE name = inputProductTypeName;
 
     -- Get product_id for the input product name
     SELECT product_id INTO productID
     FROM product
-    WHERE product_name = inputProductName AND product_type = inputProductTypeName;
+    WHERE product_name = inputProductName;
 
     -- Check if the supplier can supply the product to the store
     IF EXISTS (SELECT * 
