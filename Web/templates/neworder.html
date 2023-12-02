@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style/neworder.css') }}">
+    <title>Fresh Market</title>
+</head>
+<body>
+    <div class="container">
+    <table class="bordered">
+         <thead>
+            <tr>
+                <th>Order ID</th>
+                <th>store ID</th>
+                <th>Customer ID</th>
+            </tr>
+        </thead>
+        <tbody id="inputContainer1">
+            <tr class="inputLine1">
+                <td>
+                    <label for="order_id"></label>
+                    <input type="number" id="order_id" name="order_id" placeholder="order id" required>
+                </td>
+                <td>
+                    <label for="store_dropdown"></label>
+                    <select class="dropdown" name="store_dropdown"></select>
+                </td>
+                <td>
+                    <label for="customer_dropdown"></label>
+                    <select class="dropdown" name="customer_dropdown"></select>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+    <table class="bordered">
+        <thead>
+            <tr>
+                <th>Product Type</th>
+                <th>Product Name</th>
+                <th>Quantity</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody id="inputContainer">
+            <!-- Initial input line -->
+            <tr class="inputLine">
+                <td>
+                    <label for="dropdown1"></label>
+                    <select class="dropdown" name="dropdown1"></select>
+                </td>
+                <td>
+                    <label for="dropdown2"></label>
+                    <select class="dropdown" name="dropdown2"></select>
+                </td>
+                <td>
+                    <label for="quantity"></label>
+                    <input type="number" id="quantity" name="quantity" placeholder="quantity" required>
+                </td>
+                <td>
+                    <button name="delete" type="submit" onclick="deleteLine(this)">Delete</button>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <button type="submit" onclick="addInputLine()">Add Product</button>
+    <button type="submit" onclick="submitOrder()">Submit</button>
+    </div>
+
+    <script>
+        function addInputLine() {
+            var templateLine = document.querySelector('.inputLine');
+            var newLine = templateLine.cloneNode(true);
+
+            // Clear selected values in the new line
+            newLine.querySelector('.dropdown[name="dropdown1"]').value = "";
+            newLine.querySelector('.dropdown[name="dropdown2"]').value = "";
+
+            // Append the new line to the container
+            document.getElementById('inputContainer').appendChild(newLine);
+
+            // Fetch and populate dropdowns in the new line
+            fetchDropdowns(newLine);
+            //addDeleteButton(newLine);
+        }
+
+        function deleteLine(button) {
+            var row = button.parentNode.parentNode; // Get the parent row of the button
+            row.remove();
+        }
+
+        function attachEventListeners(line) {
+            var dropdown1 = line.querySelector('.dropdown[name="dropdown1"]');
+            var dropdown2 = line.querySelector('.dropdown[name="dropdown2"]');
+            dropdown1.addEventListener('change', function() {
+                var selectedTypeId = this.value;
+
+                // Fetch data for the second dropdown (product names) based on the selected product type
+                fetch(`/get_product_names/${selectedTypeId}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        dropdown2.innerHTML = "";
+
+                        // Populate options for the second dropdown (product names)
+                        var option = document.createElement('option');
+                        option.value = '0';
+                        option.text = "Select a product";
+                        dropdown2.add(option);
+                        data.forEach(function(item) {
+                            var option = document.createElement('option');
+                            option.value = item.name;
+                            option.text = item.name;
+                            dropdown2.add(option);
+                        });
+                    });
+            });
+        }
+
+        function fetchIDs(line) {
+            var store_dropdown = line.querySelector('.dropdown[name="store_dropdown"]');
+            var customer_dropdown = line.querySelector('.dropdown[name="customer_dropdown"]');
+
+            fetch('/get_store_id')
+                .then(response => response.json())
+                .then(data => {
+                    var option = document.createElement('option');
+                    option.value = '0';
+                    option.text = "Select a Store";
+                    store_dropdown.add(option);
+                    data.forEach(function(item) {
+                        var option = document.createElement('option');
+                        option.value = item.store_id;
+                        option.text = item.store_id;
+                        store_dropdown.add(option);
+                    });
+                })
+            fetch('/get_customer_id')
+                .then(response => response.json())
+                .then(data => {
+                    var option = document.createElement('option');
+                    option.value = '0';
+                    option.text = "Select a Customer";
+                    customer_dropdown.add(option);
+                    data.forEach(function(item) {
+                        var option = document.createElement('option');
+                        option.value = item.customer_id;
+                        option.text = item.customer_id;
+                        customer_dropdown.add(option);
+                    });
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function fetchDropdowns(line) {
+            var dropdown1 = line.querySelector('.dropdown[name="dropdown1"]');
+            var dropdown2 = line.querySelector('.dropdown[name="dropdown2"]');
+
+            dropdown1.innerHTML = "";
+
+            // Fetch data for the first dropdown (product types)
+            fetch('/get_product_types')
+                .then(response => response.json())
+                .then(data => {
+                    // Populate options for the first dropdown (product types)
+                    var option = document.createElement('option');
+                    option.value = '0';
+                    option.text = "Select a type";
+                    dropdown1.add(option);
+                    data.forEach(function(item) {
+                        var option = document.createElement('option');
+                        option.value = item.type_id;
+                        option.text = item.name;
+                        dropdown1.add(option);
+                    });
+
+                    // Add event listener for the first dropdown to fetch and populate the second dropdown (product names)
+                    dropdown1.addEventListener('change', function() {
+                        var selectedTypeId = this.value;
+
+                        // Fetch data for the second dropdown (product names) based on the selected product type
+                        fetch(`/get_product_names/${selectedTypeId}`)
+                            .then(response => response.json())
+                            .then(data => {
+                                dropdown2.innerHTML = "";
+
+                                // Populate options for the second dropdown (product names)
+                                var option = document.createElement('option');
+                                option.value = '0';
+                                option.text = "Select a product";
+                                dropdown2.add(option);
+                                data.forEach(function(item) {
+                                    var option = document.createElement('option');
+                                    option.value = item.name;
+                                    option.text = item.name;
+                                    dropdown2.add(option);
+                                });
+                            });
+                    });
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function submitOrder() {
+            var lines = [];
+            var orderInputLines = document.querySelectorAll('.inputLine1');
+            var prodInputLines = document.querySelectorAll('.inputLine');
+
+            orderInputLines.forEach(function(line) {
+                var orderID = line.querySelector('div.container input[name="order_id"]').value;
+                var storeId = line.querySelector('.dropdown[name="store_dropdown"]').value;
+                var customerId = line.querySelector('.dropdown[name="customer_dropdown"]').value;
+
+                if (orderID && storeId && customerId) {
+                    prodInputLines.forEach(function(line) {
+                        var prodName = line.querySelector('div.container select[name="dropdown2"]').value;
+                        var quantity = line.querySelector('div.container input[name="quantity"]').value;
+                        if (prodName && quantity) {
+                            lines.push({
+                                order_id: orderID,
+                                store_id: storeId,
+                                customer_id: customerId,
+                                product_name: prodName,
+                                quantity: quantity
+                            });
+                        }
+                    });
+                }
+            });
+
+            fetch('/submit_order', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ lines: lines })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        // Initial fetch and population for the first dropdown in the template input line
+        attachEventListeners(document.querySelector('.inputLine'));
+        fetchDropdowns(document.querySelector('.inputLine'));
+        fetchIDs(document.querySelector('.inputLine1'));
+    </script>
+</body>
+</html>
