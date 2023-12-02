@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Customer Feedback</title>
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="{{ url_for('static', filename='style/customer_feedback.css') }}"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Customer Feedback Form</h1>
+      {% if message %}
+      <p class="message">{{ message }}</p>
+      {% endif %} {% if error_message %}
+      <p class="error-message">{{ error_message }}</p>
+      {% endif %}
+      <form method="post">
+        <div class="form-group">
+          <label for="firstName">First Name:</label>
+          <input type="text" id="firstName" name="firstName" />
+        </div>
+        <div class="form-group">
+          <label for="lastName">Last Name:</label>
+          <input type="text" id="lastName" name="lastName" />
+        </div>
+        <div class="form-group">
+          <label for="orderID">Order ID:</label>
+          <input type="number" id="orderID" name="orderID" />
+        </div>
+        <div class="form-group">
+          <label for="rating">Rating:</label>
+          <select id="rating" name="rating">
+            <option value="1">1 - Poor</option>
+            <option value="2">2 - Fair</option>
+            <option value="3">3 - Good</option>
+            <option value="4">4 - Very Good</option>
+            <option value="5">5 - Excellent</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="review">Review:</label>
+          <textarea id="review" name="review"></textarea>
+        </div>
+        <div class="form-group">
+          <label for="date">Date:</label>
+          <input type="date" id="date" name="date" />
+        </div>
+        <input type="submit" value="Submit Feedback" class="btn" />
+      </form>
+    </div>
+  </body>
+</html>

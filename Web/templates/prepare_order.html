@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Prepare Order</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style/prepare_order.css') }}"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Prepare an Order</h1>
+      {% if error_message %}
+      <div class="alert alert-error">{{ error_message }}</div>
+      {% endif %} {% if message %}
+      <div class="alert alert-success">{{ message }}</div>
+      {% endif %}
+      <form method="post" class="order-form">
+        <div class="form-group">
+          <label for="orderID">Order ID:</label>
+          <select name="order_id" id="orderID" required>
+            <option value="">Select an Order</option>
+            <!--  Loops through orders from the backend to create <option> elements for each order. -->
+            {% for order in orders %}
+            <option value="{{ order.order_id }}">{{ order.order_id }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div class="form-group">
+          <button type="submit" class="btn btn-primary">Prepare Order</button>
+        </div>
+      </form>
+    </div>
+  </body>
+</html>
