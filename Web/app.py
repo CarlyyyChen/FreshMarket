@@ -9,10 +9,11 @@ def register():
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
+
         conn = pymysql.connect(host='localhost',
                                user='root',
                                password='123456',
-                               database='fresh_market_db',
+                               database='test_proj',
                                cursorclass=pymysql.cursors.Cursor)
         with conn:
             with conn.cursor() as cursor:
