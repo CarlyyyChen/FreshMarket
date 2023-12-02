@@ -22,11 +22,11 @@ db_config = {
     'cursorclass': pymysql.cursors.DictCursor
 }
 
-@app.route('/', methods=['GET','POST'])
+@app.route('/home', methods=['GET','POST'])
 def home():
     return render_template('home.html')
 
-@app.route('/register', methods=['GET', 'POST'])
+@app.route('/', methods=['GET', 'POST'])
 def register():
     if request.method == "POST":
         username = request.form.get("username")
@@ -69,7 +69,7 @@ def login():
             cursor.execute(sql)
             result = cursor.fetchone()
             conn.commit()
-            return render_template('login.html', error_message=result[0])
+            return render_template('home.html')
         except pymysql.err.OperationalError as e:
             error_code, message = e.args
             return render_template('login.html', error_message=message)
