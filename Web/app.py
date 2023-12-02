@@ -227,11 +227,7 @@ def order_from_supplier():
 
 @app.route('/prepare_order', methods=['GET', 'POST'])
 def prepare_order():
-    conn = pymysql.connect(host='localhost',
-                           user='root',
-                           password='123456',
-                           database='fresh_market_db',
-                           cursorclass=pymysql.cursors.DictCursor)
+    conn = pymysql.connect(**db_config)
     try:
         if request.method == 'POST':
             order_id = request.form.get('order_id')
@@ -264,11 +260,7 @@ def customer_feedback():
         inputRating = request.form.get('rating')
         inputReview = request.form.get('review')
         inputDate = request.form.get('date')  # 'YYYY-MM-DD'
-        conn = pymysql.connect(host='localhost',
-                               user='root',
-                               password='123456',
-                               database='fresh_market_db',
-                               cursorclass=pymysql.cursors.DictCursor)
+        conn = pymysql.connect(**db_config)
         try:
             with conn.cursor() as cursor:
                 cursor.callproc('add_feedback', [
@@ -295,11 +287,7 @@ def register_new_customer():
         inputCreditCardNumber = request.form.get('creditCardNumber')
         inputBirthday = request.form.get('birthday')
 
-        conn = pymysql.connect(host='localhost',
-                               user='root',
-                               password='123456',
-                               database='fresh_market_db',
-                               cursorclass=pymysql.cursors.DictCursor)
+        conn = pymysql.connect(**db_config)
         try:
             with conn.cursor() as cursor:
                 cursor.callproc('register_new_customer', [
@@ -322,6 +310,36 @@ def register_new_customer():
     else:
         return render_template('register_new_customer.html')
 
+
+@app.route('/launch_promotion', methods=['GET', 'POST'])
+def launch_promotion():
+    if request.method == 'POST':
+        inputPromotionName = request.form.get('promotionName')
+        inputStartDate = request.form.get('startDate')
+        inputEndDate = request.form.get('endDate')
+        inputDiscount = request.form.get('discount')
+
+        conn = pymysql.connect(**db_config)
+        try:
+            with conn.cursor() as cursor:
+                cursor.callproc('launch_promotion', [
+                    inputPromotionName, inputStartDate, inputEndDate, inputDiscount
+                ])
+                result = cursor.fetchone()
+                conn.commit()
+                if 'message' in result:
+                    success_message = result['message']
+                    return render_template('launch_promotion.html', success_message=success_message)
+                else:
+                    error_message = "Promotion launch failed. Please try again."
+                    return render_template('launch_promotion.html', error_message=error_message)
+        except pymysql.MySQLError as e:
+            error_code, message = e.args
+            return render_template('launch_promotion.html', error_message=message)
+        finally:
+            conn.close()
+    else:
+        return render_template('launch_promotion.html')
 
 
 if __name__ == '__main__':
