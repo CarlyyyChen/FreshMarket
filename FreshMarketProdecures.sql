@@ -171,42 +171,48 @@ CREATE PROCEDURE order_from_supplier(
     IN inputProductTypeName VARCHAR(255)
 )
 BEGIN
-    DECLARE newProductID INT;
-    DECLARE newProductTypeID INT;
-    DECLARE existingProductID INT;
-    DECLARE existingProductTypeID INT;
+    DECLARE supplierID INT;
+    DECLARE productID INT;
+    DECLARE currentQuantity INT;
+    DECLARE newQuantity INT;
 
-    -- Check for existing product type
-    SELECT type_id INTO existingProductTypeID FROM product_type WHERE name = inputProductTypeName;
-    IF existingProductTypeID IS NULL THEN
-        -- Insert new product type
-        INSERT INTO product_type(name) VALUES (inputProductTypeName);
-        SET newProductTypeID = LAST_INSERT_ID();
-    ELSE
-        SET newProductTypeID = existingProductTypeID;
-    END IF;
+    -- Get supplier_id for the input supplier name
+    SELECT supplier_id INTO supplierID
+    FROM supplier
+    WHERE supplier_name = inputSupplierName;
 
-    -- Check for existing product
-    SELECT product_id INTO existingProductID FROM product WHERE name = inputProductName;
-    IF existingProductID IS NULL THEN
-        -- Insert new product
-        INSERT INTO product(name, type_id) VALUES (inputProductName, newProductTypeID);
-        SET newProductID = LAST_INSERT_ID();
-    ELSE
-        SET newProductID = existingProductID;
-    END IF;
+    -- Get product_id for the input product name
+    SELECT product_id INTO productID
+    FROM product
+    WHERE product_name = inputProductName AND product_type = inputProductTypeName;
 
-    -- Update inventory
-    IF existingProductID IS NOT NULL THEN
-        -- Update existing product quantity
-        UPDATE inventory SET quantity = quantity + inputQuantity WHERE store_id = inputStoreID AND product_id = existingProductID;
+    -- Check if the supplier can supply the product to the store
+    IF EXISTS (SELECT * 
+               FROM store_suppliers
+               WHERE store_id = inputStoreID AND supplier_id = supplierID AND product_id = productID) THEN
+
+        -- Check if the product already exists in the inventory for the store
+        SELECT quantity INTO currentQuantity
+        FROM inventory
+        WHERE store_id = inputStoreID AND product_id = productID;
+
+        IF currentQuantity IS NOT NULL THEN
+            -- Update the quantity if the product already exists
+            SET newQuantity = currentQuantity + inputQuantity;
+            UPDATE inventory
+            SET quantity = newQuantity
+            WHERE store_id = inputStoreID AND product_id = productID;
+        ELSE
+            -- Insert new record if the product does not exist in the inventory
+            INSERT INTO inventory(store_id, product_id, quantity)
+            VALUES (inputStoreID, productID, inputQuantity);
+        END IF;
+        -- Return a success message
+		SELECT 'successfully assigned delivery for the order' AS message;
     ELSE
-        -- Insert new product quantity
-        INSERT INTO inventory(store_id, product_id, quantity) VALUES (inputStoreID, newProductID, inputQuantity);
+        SIGNAL SQLSTATE '45000'
+            SET MESSAGE_TEXT = 'Supplier cannot supply the specified product to this store.';
     END IF;
-    
-    -- Return a success message
-    SELECT 'successfully ordered products from the supplier' AS message;
 END$$
 
 DELIMITER ;
