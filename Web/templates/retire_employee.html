@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retire an Employee</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/retire_employee.css') }}">
+</head>
+<body>
+    <h1>Retire an Employee</h1>
+    <form method="POST">
+        <label for="staffID">Employee ID:</label>
+        <select name="staffID" id="staffID">
+            <!-- Dynamically populate this dropdown with employee IDs -->
+            <option value="">Select an Employee</option>
+            <!-- Options will be added here -->
+        </select>
+        <input type="submit" value="Retire Employee">
+    </form>
+    {% if success_message %}
+        <p>{{ success_message }}</p>
+    {% endif %}
+    {% if error_message %}
+        <p>{{ error_message }}</p>
+    {% endif %}
+</body>
+</html>
