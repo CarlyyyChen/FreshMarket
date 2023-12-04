@@ -1,6 +1,5 @@
 from flask import Flask, request, redirect, url_for, render_template, jsonify
 import pymysql.cursors
-import time
 import datetime
 import os
 from dotenv import load_dotenv
@@ -45,7 +44,7 @@ def register():
                     cursor.execute(sql)
                     result = cursor.fetchone()
                     conn.commit()
-                    return render_template('register.html', error_message=result[0])
+                    return render_template('login.html', error_message=result[0])
                 except pymysql.OperationalError as e:
                     error_code, message = e.args
                     return render_template('register.html', error_message=result[0])

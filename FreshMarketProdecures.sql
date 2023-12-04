@@ -8,7 +8,7 @@ begin
     begin
 		declare exit handler for 1062
 			set duplicate_entry_for_key = true;
-			insert into user_info(user_name, pwd) values (username_p, pwd_p);
+			insert into login(name, password) values (username_p, pwd_p);
 			select "User created, please login";
 	end;
 	if(duplicate_entry_for_key = true) then 
@@ -277,6 +277,7 @@ CREATE PROCEDURE launch_promotion(
     IN inputDiscount DECIMAL(5, 2)
 )
 BEGIN
+	IF CURDATE() >= inputStartDate AND CURDATE() <= inputEndDate THEN
     -- Add new row to promotion table
     INSERT INTO promotion(name, start_date, end_date, discount)
     VALUES (inputPromotionName, inputStartDate, inputEndDate, inputDiscount);
@@ -284,7 +285,7 @@ BEGIN
     -- Update all prices in product table
     UPDATE product
     SET price = price - (price * inputDiscount);
-
+    END IF;
     -- Return success message
     SELECT 'successfully launched promotion' AS message;
 END$$
