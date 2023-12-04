@@ -8,7 +8,7 @@ begin
     begin
 		declare exit handler for 1062
 			set duplicate_entry_for_key = true;
-			insert into user_info(user_name, pwd) values (username_p, pwd_p);
+			insert into login(name, password) values (username_p, pwd_p);
 			select "User created, please login";
 	end;
 	if(duplicate_entry_for_key = true) then 
