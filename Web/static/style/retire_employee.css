@@ -18,11 +18,6 @@ h1 {
   text-align: center;
 }
 
-#message-container {
-  text-align: center;
-  margin-bottom: 20px;
-}
-
 .form-group {
   margin-bottom: 20px;
 }
@@ -44,7 +39,7 @@ select {
   display: block;
   width: 100%;
   padding: 10px;
-  background-color: #d9534f; /* Red for the retire action */
+  background-color:#d9534f;
   color: white;
   border: none;
   border-radius: 4px;
@@ -56,16 +51,15 @@ select {
   background-color: #c9302c;
 }
 
-.message {
-  color: #3c763d;
-  background-color: #dff0d8;
+.message, .error-message {
+  color: #d8000c;
+  background-color: #ffbaba;
   border-radius: 4px;
   padding: 10px;
+  margin-top: 20px;
 }
 
 .error-message {
-  color: #a94442;
-  background-color: #f2dede;
-  border-radius: 4px;
-  padding: 10px;
+  color: #9f6000;
+  background-color: #feefb3;
 }
