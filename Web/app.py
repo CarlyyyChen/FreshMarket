@@ -352,6 +352,30 @@ def launch_promotion():
     else:
         return render_template('launch_promotion.html')
 
+@app.route('/retire_employee', methods=['GET', 'POST'])
+def retire_employee():
+    conn = pymysql.connect(**db_config)
+    try:
+        with conn.cursor() as cursor:
+            if request.method == 'POST':
+                inputStaffID = request.form.get('staffID')
+                cursor.callproc('retire_employee', [inputStaffID])
+                conn.commit()
+                success_message = "Employee retired successfully."
+                return render_template('retire_employee.html', success_message=success_message)
+            else:
+                cursor.execute("SELECT staff_id FROM employee")
+                employee_ids = cursor.fetchall()
+                print(employee_ids)  # Add this line for debugging
+                # Adjust the following line based on the actual structure of employee_ids
+                employee_ids = [id['staff_id'] for id in employee_ids]
+                return render_template('retire_employee.html', employee_ids=employee_ids)
+    except pymysql.MySQLError as e:
+        error_code, message = e.args
+        error_message = f"Error {error_code}: {message}"
+        return render_template('retire_employee.html', error_message=error_message)
+    finally:
+        conn.close()
 
 if __name__ == '__main__':
     app.run()
