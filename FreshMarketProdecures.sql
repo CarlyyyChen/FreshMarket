@@ -330,19 +330,21 @@ END$$
 DELIMITER ;
 
 
--- bonus: display all products and quantities in different stores under different types 
+-- bonus: display all products and quantities in different stores (display inventory)
 DELIMITER $$
 
-CREATE PROCEDURE display_products_by_type()
+CREATE PROCEDURE display_inventory(
+    IN inputStoreID INT
+)
 BEGIN
-    SELECT pt.name AS Product_Type, p.name AS Product, i.store_id, i.quantity
+    SELECT p.name, i.quantity
     FROM inventory i
-    INNER JOIN product p ON i.product_id = p.product_id
-    INNER JOIN product_type pt ON p.type_id = pt.type_id
-    ORDER BY pt.name, p.name, i.store_id;
+    JOIN product p ON i.product_id = p.product_id
+    WHERE i.store_id = inputStoreID;
 END$$
 
 DELIMITER ;
+
 
 
 

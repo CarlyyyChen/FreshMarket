@@ -2,28 +2,40 @@ from flask import Flask, request, redirect, url_for, render_template, jsonify
 import pymysql.cursors
 import time
 import datetime
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+db_host = os.getenv('DB_HOST')
+db_user = os.getenv('DB_USER')
+db_password = os.getenv('DB_PASSWORD')
+db_database = os.getenv('DB_DATABASE')
 
 app = Flask(__name__)
 
 db_config = {
-    'host': 'localhost',
-    'user': 'root',
-    'password': '123456',
-    'database': 'fresh_market_db',
+    'host': db_host,
+    'user': db_user,
+    'password': db_password,
+    'database': db_database,
     'cursorclass': pymysql.cursors.DictCursor
 }
 
+@app.route('/home', methods=['GET','POST'])
+def home():
+    return render_template('home.html')
 
-@app.route('/register', methods=['GET', 'POST'])
+@app.route('/', methods=['GET', 'POST'])
 def register():
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
 
-        conn = pymysql.connect(host='localhost',
-                               user='root',
-                               password='123456',
-                               database='fresh_market_db',
+        conn = pymysql.connect(host=db_host,
+                               user=db_user,
+                               password=db_password,
+                               database=db_database,
                                cursorclass=pymysql.cursors.Cursor)
         with conn:
             with conn.cursor() as cursor:
@@ -46,10 +58,10 @@ def login():
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        conn = pymysql.connect(host='localhost',
-                               user='root',
-                               password='123456',
-                               database='fresh_market_db',
+        conn = pymysql.connect(host=db_host,
+                               user=db_user,
+                               password=db_password,
+                               database=db_database,
                                cursorclass=pymysql.cursors.Cursor)
         cursor = conn.cursor()
         sql = "call login(\'" + username + "\', \'" + password + "\')"
@@ -57,7 +69,7 @@ def login():
             cursor.execute(sql)
             result = cursor.fetchone()
             conn.commit()
-            return render_template('login.html', error_message=result[0])
+            return render_template('home.html')
         except pymysql.err.OperationalError as e:
             error_code, message = e.args
             return render_template('login.html', error_message=message)

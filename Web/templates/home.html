@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style/home.css') }}">
+    <title>Fresh Market</title>
+    <script>
+        function redirectToNewOrder() {
+            window.location.href = '/neworder';
+          }
+          
+          function redirectToPrepareOrder() {
+            window.location.href = '/prepare_order';
+          }
+          
+          function redirectToAssignDelivery() {
+            window.location.href = '/delivery';
+          }
+          
+          function redirectToSupplier() {
+            window.location.href = '/restock';
+          }
+          
+          function redirectToRegisterNewCustomer() {
+            window.location.href = '/register_new_customer';
+          }
+          
+          function redirectToFeedback() {
+            window.location.href = '/customer_feedback';
+          }
+          
+          function redirectToPromotion() {
+            window.location.href = '/promotion';
+          }
+          
+          function redirectToDeleteEmployee() {
+            window.location.href = '/employee-management';
+          }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to Fresh Market</h1>
+        <button onclick="redirectToNewOrder()">New Order</button>
+        <button onclick="redirectToPrepareOrder()">Prepare Order</button>
+        <button onclick="redirectToAssignDelivery()">Assign Delivery</button>
+        <button onclick="redirectToSupplier()">Inventory Management</button>
+        <button onclick="redirectToRegisterNewCustomer()">Customer Management</button>
+        <button onclick="redirectToFeedback()">Customer Feedback</button>
+        <button onclick="redirectToPromotion()">Promotion</button>
+        <button onclick="redirectToDeleteEmployee()">Employee Management</button>
+    </div>
+</body>
+</html>
