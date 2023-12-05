@@ -18,6 +18,10 @@
           function redirectToAssignDelivery() {
             window.location.href = '/delivery';
           }
+
+          function redirectToInventoryVisualization(){
+            window.location.href = '/inventory_visualization';
+          }
           
           function redirectToSupplier() {
             window.location.href = '/restock';
@@ -46,6 +50,7 @@
         <button onclick="redirectToNewOrder()">New Order</button>
         <button onclick="redirectToPrepareOrder()">Prepare Order</button>
         <button onclick="redirectToAssignDelivery()">Assign Delivery</button>
+        <button onclick="redirectToInventoryVisualization()">Inventory Visualization</button>
         <button onclick="redirectToSupplier()">Inventory Management</button>
         <button onclick="redirectToRegisterNewCustomer()">Customer Management</button>
         <button onclick="redirectToFeedback()">Customer Feedback</button>

@@ -25,7 +25,11 @@ db_config = {
 def home():
     return render_template('home.html')
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/')
+def main_page():
+    return render_template('register.html')
+
+@app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == "POST":
         username = request.form.get("username")
