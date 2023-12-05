@@ -2,7 +2,7 @@ use fresh_market_db;
 
 -- register new user
 delimiter $$
-create procedure new_user(username_p varchar(30), pwd_p varchar(30))
+create procedure new_user(username_p varchar(255), pwd_p varchar(255))
 begin
 	declare duplicate_entry_for_key boolean default false;
     begin
@@ -20,7 +20,7 @@ delimiter ;
 
 -- login
 delimiter $$
-create procedure login(username_p varchar(30), pwd_p varchar(30))
+create procedure login(username_p varchar(255), pwd_p varchar(255))
 begin
 	if not exists (select 1 from login where name = username_p and password = pwd_p) then
         signal sqlstate '45000' set message_text = "Invalid username or password";
