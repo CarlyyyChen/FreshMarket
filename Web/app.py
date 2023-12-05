@@ -1,4 +1,5 @@
 from flask import Flask, request, redirect, url_for, render_template, jsonify
+from werkzeug.security import generate_password_hash, check_password_hash
 import pymysql.cursors
 import datetime
 import os
@@ -34,6 +35,9 @@ def register():
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
+        
+        # Hash the password
+        password_hash = generate_password_hash(password)
 
         conn = pymysql.connect(host=db_host,
                                user=db_user,
@@ -43,7 +47,7 @@ def register():
         with conn:
             with conn.cursor() as cursor:
                 sql = "call new_user(\'" + username + \
-                    "\', \'" + password + "\')"
+                    "\', \'" + password_hash + "\')"
                 try:
                     cursor.execute(sql)
                     result = cursor.fetchone()
@@ -67,12 +71,15 @@ def login():
                                database=db_database,
                                cursorclass=pymysql.cursors.Cursor)
         cursor = conn.cursor()
-        sql = "call login(\'" + username + "\', \'" + password + "\')"
         try:
-            cursor.execute(sql)
-            result = cursor.fetchone()
-            conn.commit()
-            return render_template('home.html')
+            cursor.execute("SELECT password_hash FROM users WHERE username = ?", (username,))
+            user = cursor.fetchone()
+
+            if user and check_password_hash(user[0], password):
+                return render_template('home.html')
+            else: 
+                message = "Invalid username or password!"
+                return render_template('login.html', error_message=message)
         except pymysql.err.OperationalError as e:
             error_code, message = e.args
             return render_template('login.html', error_message=message)
