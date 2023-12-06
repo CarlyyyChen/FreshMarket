@@ -4,6 +4,8 @@ import pymysql.cursors
 import datetime
 import os
 from dotenv import load_dotenv
+from pyecharts import options as opts
+from pyecharts.charts import Pie
 
 load_dotenv()
 
@@ -333,6 +335,50 @@ def register_new_customer():
     else:
         return render_template('register_new_customer.html')
 
+
+@app.route('/inventory_analysis', methods=['GET', 'POST'])
+def inventory_analysis():
+    return render_template('inventory_ana.html')
+
+
+@app.route('/update_inventory_graph', methods=['POST'])
+def update_inventory_graph():
+    data = request.json
+    conn = pymysql.connect(host=db_host,
+                           user=db_user,
+                           password=db_password,
+                           database=db_database,
+                           cursorclass=pymysql.cursors.Cursor)
+    cursor = conn.cursor()
+    try:
+        query = "call display_inventory(%s)"
+        store_id = data.get('store_id')
+        cursor.execute(query, int(store_id))
+        result = cursor.fetchall()
+        conn.commit()
+        cursor.close()
+        conn.close()
+        c = (
+            Pie()
+            .add(
+                "",
+                result,
+                radius=["40%", "75%"],
+            )
+            .set_global_opts(
+                title_opts=opts.TitleOpts(title="Inventory in store" + store_id),
+                legend_opts=opts.LegendOpts(orient="vertical", pos_top="15%", pos_left="2%"),
+            )
+            .set_series_opts(label_opts=opts.LabelOpts(formatter="{b}: {c}"))
+        )
+        file_path = "templates/pie_radius.html"
+        c.render(file_path)
+        with open(file_path, 'r') as file:
+            html_content = file.read()
+        return jsonify(result=html_content)
+    except pymysql.err.OperationalError as e:
+        error_code, message = e.args
+        return render_template('inventory_ana.html', src=message)
 
 @app.route('/launch_promotion', methods=['GET', 'POST'])
 def launch_promotion():
