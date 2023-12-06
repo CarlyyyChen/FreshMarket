@@ -255,6 +255,8 @@ CREATE TABLE orders (
   FOREIGN KEY (store_id) REFERENCES store(store_id) ON UPDATE CASCADE ON DELETE RESTRICT
 );
 
+Insert into orders (order_id, date, status, customer_id, store_id) values ("10888","2022-12-20","new","1","1");
+
 CREATE TABLE order_products (
  order_id INT NOT NULL,
  product_id INT NOT NULL,
@@ -263,6 +265,9 @@ CREATE TABLE order_products (
  FOREIGN KEY (order_id) REFERENCES orders(order_id) ON UPDATE CASCADE ON DELETE RESTRICT,
  FOREIGN KEY (product_id) REFERENCES product(product_id) ON UPDATE CASCADE ON DELETE RESTRICT
 );
+
+Insert into order_products (order_id, product_id, product_quantity) values("10888","1","5");
+Insert into order_products (order_id, product_id, product_quantity) values("10888","16","2");
 
 CREATE TABLE freight_truck (
   license_plate VARCHAR(255) PRIMARY KEY,
