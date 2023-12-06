@@ -53,25 +53,25 @@ BEGIN
     IF existingOrder = 0 THEN
         INSERT INTO orders(order_id, date, status, customer_id, store_id) 
         VALUES (orderID, orderDate, 'new', custID, storeID);
+        -- Get product_id from product name
+		SELECT product_id INTO prodID FROM product WHERE name = prodName;
+
+		-- Check if product exists
+		IF prodID IS NOT NULL THEN
+			-- Insert into order_products table
+			INSERT INTO order_products(order_id, product_id, product_quantity) 
+			VALUES (orderID, prodID, prodQuantity)
+			ON DUPLICATE KEY UPDATE product_quantity = product_quantity + prodQuantity;
+
+			SET message = 'Successfully received a new order';
+		ELSE
+			SET message = 'Failed to receive new order';
+		END IF;
 	ELSE
 		SIGNAL SQLSTATE '45000';
 		SET message = 'Order ID already exist';
     END IF;
 
-    -- Get product_id from product name
-    SELECT product_id INTO prodID FROM product WHERE name = prodName;
-
-    -- Check if product exists
-    IF prodID IS NOT NULL THEN
-        -- Insert into order_products table
-        INSERT INTO order_products(order_id, product_id, product_quantity) 
-        VALUES (orderID, prodID, prodQuantity)
-        ON DUPLICATE KEY UPDATE product_quantity = product_quantity + prodQuantity;
-
-        SET message = 'Successfully received a new order';
-    ELSE
-        SET message = 'Failed to receive new order';
-    END IF;
 END$$
 
 DELIMITER ;
