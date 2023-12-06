@@ -161,7 +161,6 @@ def submit_order():
         now_date = datetime.date.today()
         # Access the JSON data sent with the POST request
         data = request.json
-        print(data)
         # Insert the order details into the "order_detail" table
         conn = pymysql.connect(**db_config)
         cursor = conn.cursor()
