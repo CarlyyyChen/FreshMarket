@@ -1,6 +1,6 @@
 from flask import Flask, request, redirect, url_for, render_template, jsonify
+from werkzeug.security import generate_password_hash, check_password_hash
 import pymysql.cursors
-import time
 import datetime
 import os
 from dotenv import load_dotenv
@@ -28,11 +28,18 @@ db_config = {
 def home():
     return render_template('home.html')
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/')
+def main_page():
+    return render_template('register.html')
+
+@app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == "POST":
         username = request.form.get("username")
         password = request.form.get("password")
+        
+        # Hash the password
+        password_hash = generate_password_hash(password)
 
         conn = pymysql.connect(host=db_host,
                                user=db_user,
@@ -42,12 +49,12 @@ def register():
         with conn:
             with conn.cursor() as cursor:
                 sql = "call new_user(\'" + username + \
-                    "\', \'" + password + "\')"
+                    "\', \'" + password_hash + "\')"
                 try:
                     cursor.execute(sql)
                     result = cursor.fetchone()
                     conn.commit()
-                    return render_template('register.html', error_message=result[0])
+                    return render_template('login.html', error_message=result[0])
                 except pymysql.OperationalError as e:
                     error_code, message = e.args
                     return render_template('register.html', error_message=result[0])
@@ -66,12 +73,15 @@ def login():
                                database=db_database,
                                cursorclass=pymysql.cursors.Cursor)
         cursor = conn.cursor()
-        sql = "call login(\'" + username + "\', \'" + password + "\')"
         try:
-            cursor.execute(sql)
-            result = cursor.fetchone()
-            conn.commit()
-            return render_template('home.html')
+            cursor.execute("SELECT password_hash FROM users WHERE username = ?", (username,))
+            user = cursor.fetchone()
+
+            if user and check_password_hash(user[0], password):
+                return render_template('home.html')
+            else: 
+                message = "Invalid username or password!"
+                return render_template('login.html', error_message=message)
         except pymysql.err.OperationalError as e:
             error_code, message = e.args
             return render_template('login.html', error_message=message)
@@ -241,11 +251,7 @@ def order_from_supplier():
 
 @app.route('/prepare_order', methods=['GET', 'POST'])
 def prepare_order():
-    conn = pymysql.connect(host='localhost',
-                           user='root',
-                           password='123456',
-                           database='fresh_market_db',
-                           cursorclass=pymysql.cursors.DictCursor)
+    conn = pymysql.connect(**db_config)
     try:
         if request.method == 'POST':
             order_id = request.form.get('order_id')
@@ -278,11 +284,7 @@ def customer_feedback():
         inputRating = request.form.get('rating')
         inputReview = request.form.get('review')
         inputDate = request.form.get('date')  # 'YYYY-MM-DD'
-        conn = pymysql.connect(host='localhost',
-                               user='root',
-                               password='123456',
-                               database='fresh_market_db',
-                               cursorclass=pymysql.cursors.DictCursor)
+        conn = pymysql.connect(**db_config)
         try:
             with conn.cursor() as cursor:
                 cursor.callproc('add_feedback', [
@@ -309,11 +311,7 @@ def register_new_customer():
         inputCreditCardNumber = request.form.get('creditCardNumber')
         inputBirthday = request.form.get('birthday')
 
-        conn = pymysql.connect(host='localhost',
-                               user='root',
-                               password='123456',
-                               database='fresh_market_db',
-                               cursorclass=pymysql.cursors.DictCursor)
+        conn = pymysql.connect(**db_config)
         try:
             with conn.cursor() as cursor:
                 cursor.callproc('register_new_customer', [
@@ -381,6 +379,60 @@ def update_inventory_graph():
         error_code, message = e.args
         return render_template('inventory_ana.html', src=message)
 
+@app.route('/launch_promotion', methods=['GET', 'POST'])
+def launch_promotion():
+    if request.method == 'POST':
+        inputPromotionName = request.form.get('promotionName')
+        inputStartDate = request.form.get('startDate')
+        inputEndDate = request.form.get('endDate')
+        inputDiscount = request.form.get('discount')
+
+        conn = pymysql.connect(**db_config)
+        try:
+            with conn.cursor() as cursor:
+                cursor.callproc('launch_promotion', [
+                    inputPromotionName, inputStartDate, inputEndDate, inputDiscount
+                ])
+                result = cursor.fetchone()
+                conn.commit()
+                if 'message' in result:
+                    success_message = result['message']
+                    return render_template('launch_promotion.html', success_message=success_message)
+                else:
+                    error_message = "Promotion launch failed. Please try again."
+                    return render_template('launch_promotion.html', error_message=error_message)
+        except pymysql.MySQLError as e:
+            error_code, message = e.args
+            return render_template('launch_promotion.html', error_message=message)
+        finally:
+            conn.close()
+    else:
+        return render_template('launch_promotion.html')
+
+@app.route('/retire_employee', methods=['GET', 'POST'])
+def retire_employee():
+    conn = pymysql.connect(**db_config)
+    try:
+        with conn.cursor() as cursor:
+            if request.method == 'POST':
+                inputStaffID = request.form.get('staffID')
+                cursor.callproc('retire_employee', [inputStaffID])
+                conn.commit()
+                success_message = "Employee retired successfully."
+                return render_template('retire_employee.html', success_message=success_message)
+            else:
+                cursor.execute("SELECT staff_id FROM employee")
+                employee_ids = cursor.fetchall()
+                print(employee_ids)  # Add this line for debugging
+                # Adjust the following line based on the actual structure of employee_ids
+                employee_ids = [id['staff_id'] for id in employee_ids]
+                return render_template('retire_employee.html', employee_ids=employee_ids)
+    except pymysql.MySQLError as e:
+        error_code, message = e.args
+        error_message = f"Error {error_code}: {message}"
+        return render_template('retire_employee.html', error_message=error_message)
+    finally:
+        conn.close()
 
 if __name__ == '__main__':
     app.run()

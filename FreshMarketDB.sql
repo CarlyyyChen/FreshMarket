@@ -3,11 +3,8 @@ use fresh_market_db;
 
 CREATE TABLE login(
 	name varchar(30) PRIMARY KEY,
-    password varchar(30) NOT NULL
+    password varchar(255) NOT NULL
 );
-
-Insert into login(name, password) values("user1","111111");
-Insert into login(name, password) values("user2","222222");
 
 CREATE TABLE product_type (
   type_id INT PRIMARY KEY,
