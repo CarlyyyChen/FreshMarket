@@ -161,15 +161,16 @@ def submit_order():
         now_date = datetime.date.today()
         # Access the JSON data sent with the POST request
         data = request.json
-        # print(data)
+        print(data)
         # Insert the order details into the "order_detail" table
         conn = pymysql.connect(**db_config)
         cursor = conn.cursor()
-        # query = "INSERT INTO order_detail (product_type_id, product_id) VALUES (%s, %s)"
-        query = "call new_order(%s, %s, %s, %s, %s, %s, @message)"
+        query = "call check_new_orderID(%s, %s, %s, %s, @message)"
+        firstline = data['lines'][0]
+        cursor.execute(query, (firstline['order_id'], now_date, firstline['customer_id'], firstline['store_id']))
+        query = "call update_order_products(%s, %s, %s, @message)"
         for line in data['lines']:
-            cursor.execute(query, (line['order_id'], now_date, line['customer_id'], line['store_id'],
-                                   line['product_name'], line['quantity']))
+            cursor.execute(query, (line['order_id'], line['product_name'], line['quantity']))
         conn.commit()
         cursor.close()
         conn.close()
