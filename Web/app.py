@@ -72,7 +72,8 @@ def login():
                                cursorclass=pymysql.cursors.Cursor)
         cursor = conn.cursor()
         try:
-            cursor.execute("SELECT password_hash FROM users WHERE username = ?", (username,))
+            sql = "SELECT password FROM login WHERE name = %s"
+            cursor.execute(sql, username)
             user = cursor.fetchone()
 
             if user and check_password_hash(user[0], password):
