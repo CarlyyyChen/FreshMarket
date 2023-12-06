@@ -280,17 +280,22 @@ CREATE PROCEDURE launch_promotion(
     IN inputDiscount DECIMAL(5, 2)
 )
 BEGIN
-	IF CURDATE() >= inputStartDate AND CURDATE() <= inputEndDate THEN
-    -- Add new row to promotion table
-    INSERT INTO promotion(name, start_date, end_date, discount)
-    VALUES (inputPromotionName, inputStartDate, inputEndDate, inputDiscount);
+	IF inputDiscount < 0 or inputDiscount > 1 THEN
+		SIGNAL SQLSTATE '45000';
+		SELECT 'Invalid discount rate' AS message;
+	ELSE 
+		IF CURDATE() >= inputStartDate AND CURDATE() <= inputEndDate THEN
+		-- Add new row to promotion table
+		INSERT INTO promotion(name, start_date, end_date, discount)
+		VALUES (inputPromotionName, inputStartDate, inputEndDate, inputDiscount);
 
-    -- Update all prices in product table
-    UPDATE product
-    SET price = price - (price * inputDiscount);
+		-- Update all prices in product table
+		UPDATE product
+		SET price = price - (price * inputDiscount);
+		END IF;
+		-- Return success message
+		SELECT 'successfully launched promotion' AS message;
     END IF;
-    -- Return success message
-    SELECT 'successfully launched promotion' AS message;
 END$$
 
 DELIMITER ;
