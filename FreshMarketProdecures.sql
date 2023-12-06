@@ -2,13 +2,13 @@ use fresh_market_db;
 
 -- register new user
 delimiter $$
-create procedure new_user(username_p varchar(30), pwd_p varchar(30))
+create procedure new_user(username_p varchar(255), pwd_p varchar(255))
 begin
 	declare duplicate_entry_for_key boolean default false;
     begin
 		declare exit handler for 1062
 			set duplicate_entry_for_key = true;
-			insert into user_info(user_name, pwd) values (username_p, pwd_p);
+			insert into login(name, password) values (username_p, pwd_p);
 			select "User created, please login";
 	end;
 	if(duplicate_entry_for_key = true) then 
@@ -20,7 +20,7 @@ delimiter ;
 
 -- login
 delimiter $$
-create procedure login(username_p varchar(30), pwd_p varchar(30))
+create procedure login(username_p varchar(255), pwd_p varchar(255))
 begin
 	if not exists (select 1 from login where name = username_p and password = pwd_p) then
         signal sqlstate '45000' set message_text = "Invalid username or password";
@@ -277,6 +277,7 @@ CREATE PROCEDURE launch_promotion(
     IN inputDiscount DECIMAL(5, 2)
 )
 BEGIN
+	IF CURDATE() >= inputStartDate AND CURDATE() <= inputEndDate THEN
     -- Add new row to promotion table
     INSERT INTO promotion(name, start_date, end_date, discount)
     VALUES (inputPromotionName, inputStartDate, inputEndDate, inputDiscount);
@@ -284,7 +285,7 @@ BEGIN
     -- Update all prices in product table
     UPDATE product
     SET price = price - (price * inputDiscount);
-
+    END IF;
     -- Return success message
     SELECT 'successfully launched promotion' AS message;
 END$$

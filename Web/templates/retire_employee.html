@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retire an Employee</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style/retire_employee.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Retire an Employee</h1>
+        <form method="POST">
+            <div class="form-group">
+                <label for="staffID">Employee ID:</label>
+                <select name="staffID" id="staffID" class="form-control">
+                    <option value="">Select an Employee</option>
+                    {% for id in employee_ids %}
+                    <option value="{{ id }}">{{ id }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <input type="submit" value="Retire Employee" class="btn">
+        </form>
+        {% if success_message %}
+            <p class="message success">{{ success_message }}</p>
+        {% endif %}
+        {% if error_message %}
+            <p class="message error">{{ error_message }}</p>
+        {% endif %}
+    </div>
+</body>
+</html>
