@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style/neworder.css') }}">
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts/dist/echarts.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts-gl/dist/echarts-gl.min.js"></script>
+    <style>
+    #resultContainer {
+        background-color: white;
+        z-index: 1000;
+        position: relative;
+    }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Inventory Status</h1>
+        <table class="bordered">
+            <thead>
+                <tr>
+                    <th>Store ID</th>
+                </tr>
+            </thead>
+            <tbody id="inputContainer">
+                <tr class="inputLine">
+                    <td>
+                        <label for="store_dropdown"></label>
+                        <select class="dropdown" name="store_dropdown"></select>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <button type="submit" onclick="inventoryAnalysis()">Show inventory</button>
+        <p>{{ src }}</p>
+    </div>
+
+    <div class="container" id="resultContainer">
+    <!-- The result will be displayed here -->
+    </div>
+
+    <script>
+        function fetchIDs(line) {
+            var store_dropdown = line.querySelector('.dropdown[name="store_dropdown"]');
+            fetch('/get_store_id')
+                .then(response => response.json())
+                .then(data => {
+                    var option = document.createElement('option');
+                    option.value = '0';
+                    option.text = "Select a Store";
+                    store_dropdown.add(option);
+                    data.forEach(function (item) {
+                        var option = document.createElement('option');
+                        option.value = item.store_id;
+                        option.text = item.store_id;
+                        store_dropdown.add(option);
+                    });
+                })
+        }
+
+        function inventoryAnalysis() {
+            var storeID = document.querySelector('.dropdown[name="store_dropdown"]').value;
+            fetch('/update_inventory_graph', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({store_id: storeID})
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Update the result container with the received HTML content
+                $('#resultContainer').html(data.result);
+            })
+            .catch(error => {
+                console.error('Error occurred during fetch:', error);
+            });
+        }
+        fetchIDs(document.querySelector('.inputLine'));
+    </script>
+</body>
+</html>

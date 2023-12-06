@@ -1,0 +1,155 @@
+Index: Web/templates/home.html
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><!DOCTYPE html>\r\n<html lang=\"en\">\r\n<head>\r\n    <meta charset=\"UTF-8\" />\r\n    <meta http-equiv=\"X-UA-Compatible\" content=\"IE=edge\" />\r\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\" />\r\n    <link rel=\"stylesheet\" type=\"text/css\" href=\"{{ url_for('static', filename='style/home.css') }}\">\r\n    <title>Fresh Market</title>\r\n    <script>\r\n        function redirectToNewOrder() {\r\n            window.location.href = '/neworder';\r\n          }\r\n          \r\n          function redirectToPrepareOrder() {\r\n            window.location.href = '/prepare_order';\r\n          }\r\n          \r\n          function redirectToAssignDelivery() {\r\n            window.location.href = '/delivery';\r\n          }\r\n          \r\n          function redirectToSupplier() {\r\n            window.location.href = '/restock';\r\n          }\r\n          \r\n          function redirectToRegisterNewCustomer() {\r\n            window.location.href = '/register_new_customer';\r\n          }\r\n          \r\n          function redirectToFeedback() {\r\n            window.location.href = '/customer_feedback';\r\n          }\r\n          \r\n          function redirectToPromotion() {\r\n            window.location.href = '/promotion';\r\n          }\r\n          \r\n          function redirectToDeleteEmployee() {\r\n            window.location.href = '/employee-management';\r\n          }\r\n    </script>\r\n</head>\r\n<body>\r\n    <div class=\"container\">\r\n        <h1>Welcome to Fresh Market</h1>\r\n        <button onclick=\"redirectToNewOrder()\">New Order</button>\r\n        <button onclick=\"redirectToPrepareOrder()\">Prepare Order</button>\r\n        <button onclick=\"redirectToAssignDelivery()\">Assign Delivery</button>\r\n        <button onclick=\"redirectToSupplier()\">Inventory Management</button>\r\n        <button onclick=\"redirectToRegisterNewCustomer()\">Customer Management</button>\r\n        <button onclick=\"redirectToFeedback()\">Customer Feedback</button>\r\n        <button onclick=\"redirectToPromotion()\">Promotion</button>\r\n        <button onclick=\"redirectToDeleteEmployee()\">Employee Management</button>\r\n    </div>\r\n</body>\r\n</html>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/Web/templates/home.html b/Web/templates/home.html
+--- a/Web/templates/home.html	(revision afe5994dc4413810f4ab8f9c12bf87a84de05ddf)
++++ b/Web/templates/home.html	(date 1701728850304)
+@@ -38,6 +38,10 @@
+           function redirectToDeleteEmployee() {
+             window.location.href = '/employee-management';
+           }
++
++          function redirectToAnalyzeInventory() {
++            window.location.href = '/inventory-ana';
++          }
+     </script>
+ </head>
+ <body>
+@@ -51,6 +55,7 @@
+         <button onclick="redirectToFeedback()">Customer Feedback</button>
+         <button onclick="redirectToPromotion()">Promotion</button>
+         <button onclick="redirectToDeleteEmployee()">Employee Management</button>
++        <button onclick="redirectToAnalyzeInventory()">Inventory Analysis</button>
+     </div>
+ </body>
+ </html>
+\ No newline at end of file
+Index: Web/app.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from flask import Flask, request, redirect, url_for, render_template, jsonify\r\nimport pymysql.cursors\r\nimport time\r\nimport datetime\r\nimport os\r\nfrom dotenv import load_dotenv\r\n\r\nload_dotenv()\r\n\r\ndb_host = os.getenv('DB_HOST')\r\ndb_user = os.getenv('DB_USER')\r\ndb_password = os.getenv('DB_PASSWORD')\r\ndb_database = os.getenv('DB_DATABASE')\r\n\r\napp = Flask(__name__)\r\n\r\ndb_config = {\r\n    'host': db_host,\r\n    'user': db_user,\r\n    'password': db_password,\r\n    'database': db_database,\r\n    'cursorclass': pymysql.cursors.DictCursor\r\n}\r\n\r\n@app.route('/home', methods=['GET','POST'])\r\ndef home():\r\n    return render_template('home.html')\r\n\r\n@app.route('/', methods=['GET', 'POST'])\r\ndef register():\r\n    if request.method == \"POST\":\r\n        username = request.form.get(\"username\")\r\n        password = request.form.get(\"password\")\r\n\r\n        conn = pymysql.connect(host=db_host,\r\n                               user=db_user,\r\n                               password=db_password,\r\n                               database=db_database,\r\n                               cursorclass=pymysql.cursors.Cursor)\r\n        with conn:\r\n            with conn.cursor() as cursor:\r\n                sql = \"call new_user(\\'\" + username + \\\r\n                    \"\\', \\'\" + password + \"\\')\"\r\n                try:\r\n                    cursor.execute(sql)\r\n                    result = cursor.fetchone()\r\n                    conn.commit()\r\n                    return render_template('register.html', error_message=result[0])\r\n                except pymysql.OperationalError as e:\r\n                    error_code, message = e.args\r\n                    return render_template('register.html', error_message=result[0])\r\n    else:\r\n        return render_template('register.html')\r\n\r\n\r\n@app.route('/login', methods=['GET', 'POST'])\r\ndef login():\r\n    if request.method == 'POST':\r\n        username = request.form.get('username')\r\n        password = request.form.get('password')\r\n        conn = pymysql.connect(host=db_host,\r\n                               user=db_user,\r\n                               password=db_password,\r\n                               database=db_database,\r\n                               cursorclass=pymysql.cursors.Cursor)\r\n        cursor = conn.cursor()\r\n        sql = \"call login(\\'\" + username + \"\\', \\'\" + password + \"\\')\"\r\n        try:\r\n            cursor.execute(sql)\r\n            result = cursor.fetchone()\r\n            conn.commit()\r\n            return render_template('home.html')\r\n        except pymysql.err.OperationalError as e:\r\n            error_code, message = e.args\r\n            return render_template('login.html', error_message=message)\r\n    else:\r\n        return render_template('login.html')\r\n\r\n\r\n@app.route('/neworder')\r\ndef neworder():\r\n    return render_template('neworder.html')\r\n\r\n\r\n@app.route('/get_store_id')\r\ndef get_store_id():\r\n    conn = pymysql.connect(**db_config)\r\n    cursor = conn.cursor()\r\n    query = \"SELECT store_id FROM store\"\r\n    cursor.execute(query)\r\n    store_id = cursor.fetchall()\r\n    cursor.close()\r\n    conn.close()\r\n    return jsonify(store_id)\r\n\r\n\r\n@app.route('/get_customer_id')\r\ndef get_customer_id():\r\n    conn = pymysql.connect(**db_config)\r\n    cursor = conn.cursor()\r\n    query = \"SELECT customer_id FROM customer\"\r\n    cursor.execute(query)\r\n    customer_id = cursor.fetchall()\r\n    cursor.close()\r\n    conn.close()\r\n    return jsonify(customer_id)\r\n\r\n\r\n@app.route('/get_supplier_id')\r\ndef get_supplier_id():\r\n    conn = pymysql.connect(**db_config)\r\n    cursor = conn.cursor()\r\n    query = \"SELECT supplier_id FROM supplier\"\r\n    cursor.execute(query)\r\n    supplier_id = cursor.fetchall()\r\n    cursor.close()\r\n    conn.close()\r\n    return jsonify(supplier_id)\r\n\r\n\r\n@app.route('/get_product_types')\r\ndef get_product_types():\r\n    conn = pymysql.connect(**db_config)\r\n    cursor = conn.cursor()\r\n    query = \"SELECT type_id, name FROM product_type\"\r\n    cursor.execute(query)\r\n    product_types = cursor.fetchall()\r\n    cursor.close()\r\n    conn.close()\r\n    return jsonify(product_types)\r\n\r\n\r\n@app.route('/get_product_names/<int:type_id>')\r\ndef get_product_names(type_id):\r\n    conn = pymysql.connect(**db_config)\r\n    cursor = conn.cursor()\r\n    query = f\"SELECT product_id, name FROM product WHERE type_id = {type_id}\"\r\n    cursor.execute(query)\r\n    product_names = cursor.fetchall()\r\n    cursor.close()\r\n    conn.close()\r\n    return jsonify(product_names)\r\n\r\n\r\n@app.route('/submit_order', methods=['POST'])\r\ndef submit_order():\r\n    try:\r\n        now_date = datetime.date.today()\r\n        # Access the JSON data sent with the POST request\r\n        data = request.json\r\n        print(data)\r\n        # Insert the order details into the \"order_detail\" table\r\n        conn = pymysql.connect(**db_config)\r\n        cursor = conn.cursor()\r\n        # query = \"INSERT INTO order_detail (product_type_id, product_id) VALUES (%s, %s)\"\r\n        query = \"call new_order(%s, %s, %s, %s, %s, %s, @message)\"\r\n        for line in data['lines']:\r\n            cursor.execute(query, (line['order_id'], now_date, line['customer_id'], line['store_id'],\r\n                                   line['product_name'], line['quantity']))\r\n        conn.commit()\r\n        cursor.close()\r\n        conn.close()\r\n        return jsonify({'success': True, 'message': 'Order submitted successfully'})\r\n    except pymysql.err.IntegrityError as e:\r\n        return jsonify({'success': False, 'message': str(e)})\r\n\r\n\r\n@app.route('/delivery')\r\ndef delivery():\r\n    return render_template('delivery.html')\r\n\r\n\r\n@app.route('/get_order_id')\r\ndef get_order_id():\r\n    conn = pymysql.connect(**db_config)\r\n    cursor = conn.cursor()\r\n    query = \"SELECT order_id FROM orders WHERE status = \\'filled\\'\"\r\n    cursor.execute(query)\r\n    order_id = cursor.fetchall()\r\n    cursor.close()\r\n    conn.close()\r\n    return jsonify(order_id)\r\n\r\n\r\n@app.route('/get_truck_id')\r\ndef get_truck_id():\r\n    conn = pymysql.connect(**db_config)\r\n    cursor = conn.cursor()\r\n    query = \"SELECT license_plate FROM freight_truck WHERE availability = true\"\r\n    cursor.execute(query)\r\n    order_id = cursor.fetchall()\r\n    cursor.close()\r\n    conn.close()\r\n    return jsonify(order_id)\r\n\r\n\r\n@app.route('/assign_delivery', methods=['POST'])\r\ndef assign_delivery():\r\n    try:\r\n        # Access the JSON data sent with the POST request\r\n        data = request.json\r\n        conn = pymysql.connect(**db_config)\r\n        cursor = conn.cursor()\r\n        query = \"call assign_delivery(%s, %s)\"\r\n        for line in data['lines']:\r\n            cursor.execute(query, (line['truck_id'], line['order_id']))\r\n        conn.commit()\r\n        cursor.close()\r\n        conn.close()\r\n        return jsonify({'success': True, 'message': 'Successfully assigned delivery'})\r\n    except pymysql.err.IntegrityError as e:\r\n        return jsonify({'success': False, 'message': str(e)})\r\n\r\n\r\n@app.route('/restock')\r\ndef restock():\r\n    return render_template('restock.html')\r\n\r\n\r\n@app.route('/order_from_supplier', methods=['POST'])\r\ndef order_from_supplier():\r\n    try:\r\n        # Access the JSON data sent with the POST request\r\n        data = request.json\r\n        conn = pymysql.connect(**db_config)\r\n        cursor = conn.cursor()\r\n        query = \"call order_from_supplier(%s, %s, %s, %s, %s)\"\r\n        for line in data['lines']:\r\n            cursor.execute(query, (line['supplier_id'], line['store_id'], line['prod_name'], line['quantity'],\r\n                                   line['prod_type']))\r\n        conn.commit()\r\n        cursor.close()\r\n        conn.close()\r\n        return jsonify({'success': True, 'message': 'Successfully ordered product from supplier'})\r\n    except pymysql.err.OperationalError as e:\r\n        error_code, message = e.args\r\n        return jsonify({'success': False, 'message': message})\r\n\r\n\r\n@app.route('/prepare_order', methods=['GET', 'POST'])\r\ndef prepare_order():\r\n    conn = pymysql.connect(host='localhost',\r\n                           user='root',\r\n                           password='123456',\r\n                           database='fresh_market_db',\r\n                           cursorclass=pymysql.cursors.DictCursor)\r\n    try:\r\n        if request.method == 'POST':\r\n            order_id = request.form.get('order_id')\r\n            with conn.cursor() as cursor:\r\n                cursor.callproc('prepare_order', [order_id])\r\n                result = cursor.fetchone()\r\n                conn.commit()\r\n                message = result['message'] if result else 'Order processed.'\r\n                return render_template('prepare_order.html', message=message)\r\n        else:\r\n            # Fetch all orders with status 'new' for the dropdown\r\n            with conn.cursor() as cursor:\r\n                cursor.execute(\r\n                    \"SELECT order_id FROM orders WHERE status = 'new'\")\r\n                orders = cursor.fetchall()\r\n                return render_template('prepare_order.html', orders=orders)\r\n    except pymysql.MySQLError as e:\r\n        error_code, message = e.args\r\n        return render_template('prepare_order.html', error_message=message)\r\n    finally:\r\n        conn.close()\r\n\r\n\r\n@app.route('/customer_feedback', methods=['GET', 'POST'])\r\ndef customer_feedback():\r\n    if request.method == 'POST':\r\n        inputFirstName = request.form.get('firstName')\r\n        inputLastName = request.form.get('lastName')\r\n        inputOrderID = request.form.get('orderID')\r\n        inputRating = request.form.get('rating')\r\n        inputReview = request.form.get('review')\r\n        inputDate = request.form.get('date')  # 'YYYY-MM-DD'\r\n        conn = pymysql.connect(host='localhost',\r\n                               user='root',\r\n                               password='123456',\r\n                               database='fresh_market_db',\r\n                               cursorclass=pymysql.cursors.DictCursor)\r\n        try:\r\n            with conn.cursor() as cursor:\r\n                cursor.callproc('add_feedback', [\r\n                                inputFirstName, inputLastName, inputOrderID, inputRating, inputReview, inputDate])\r\n                result = cursor.fetchone()\r\n                conn.commit()\r\n                message = result['message'] if result else 'successfully received new feedback.'\r\n                return render_template('customer_feedback.html', message=message)\r\n        except pymysql.MySQLError as e:\r\n            error_code, message = e.args\r\n            return render_template('customer_feedback.html', error_message=message)\r\n        finally:\r\n            conn.close()\r\n    else:\r\n        return render_template('customer_feedback.html')\r\n\r\n\r\n@app.route('/register_new_customer', methods=['GET', 'POST'])\r\ndef register_new_customer():\r\n    if request.method == 'POST':\r\n        inputFirstName = request.form.get('firstName')\r\n        inputLastName = request.form.get('lastName')\r\n        inputAddress = request.form.get('address')\r\n        inputCreditCardNumber = request.form.get('creditCardNumber')\r\n        inputBirthday = request.form.get('birthday')\r\n\r\n        conn = pymysql.connect(host='localhost',\r\n                               user='root',\r\n                               password='123456',\r\n                               database='fresh_market_db',\r\n                               cursorclass=pymysql.cursors.DictCursor)\r\n        try:\r\n            with conn.cursor() as cursor:\r\n                cursor.callproc('register_new_customer', [\r\n                    inputFirstName, inputLastName, inputAddress, inputCreditCardNumber, inputBirthday\r\n                ])\r\n                result = cursor.fetchone()\r\n                conn.commit()\r\n                if 'message' in result:\r\n                    # registration successful\r\n                    success_message = result['message']\r\n                    return render_template('register_new_customer.html', success_message=success_message)\r\n                else:\r\n                    error_message = \"Registration failed. Please try again.\"\r\n                    return render_template('register_new_customer.html', error_message=error_message)\r\n        except pymysql.MySQLError as e:\r\n            error_code, message = e.args\r\n            return render_template('customer_feedback.html', error_message=message)\r\n        finally:\r\n            conn.close()\r\n    else:\r\n        return render_template('register_new_customer.html')\r\n\r\n\r\n\r\nif __name__ == '__main__':\r\n    app.run()\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/Web/app.py b/Web/app.py
+--- a/Web/app.py	(revision afe5994dc4413810f4ab8f9c12bf87a84de05ddf)
++++ b/Web/app.py	(date 1701728921949)
+@@ -4,6 +4,8 @@
+ import datetime
+ import os
+ from dotenv import load_dotenv
++from pyecharts import options as opts
++from pyecharts.charts import Pie
+ 
+ load_dotenv()
+ 
+@@ -335,6 +337,40 @@
+         return render_template('register_new_customer.html')
+ 
+ 
++@app.route('/inventory-ana', methods=['GET', 'POST'])
++def inventory_analysis():
++    if request.method == 'POST':
++        store_id = request.form.get('storeID')
++        conn = pymysql.connect(**db_config)
++        cursor = conn.cursor()
++        sql = "call display_inventory(" + store_id + ")"
++        try:
++            cursor.execute(sql)
++            result = cursor.fetchall()
++            conn.commit()
++
++            c = (
++                Pie()
++                .add(
++                    "",
++                    result,
++                    radius=["40%", "75%"],
++                )
++                .set_global_opts(
++                    title_opts=opts.TitleOpts(title="Pie-Radius"),
++                    legend_opts=opts.LegendOpts(orient="vertical", pos_top="15%", pos_left="2%"),
++                )
++                .set_series_opts(label_opts=opts.LabelOpts(formatter="{b}: {c}"))
++                .render("pie_radius.html")
++            )
++
++            return render_template('inventory-ana.html', src='pie_radius.html')
++        except pymysql.err.OperationalError as e:
++            error_code, message = e.args
++            return render_template('inventory-ana.html', src=message)
++    else:
++        return render_template('inventory-ana.html')
++
+ 
+ if __name__ == '__main__':
+     app.run()
+Index: Web/templates/inventory_ana.html
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/Web/templates/inventory_ana.html b/Web/templates/inventory_ana.html
+new file mode 100644
+--- /dev/null	(date 1701728816852)
++++ b/Web/templates/inventory_ana.html	(date 1701728816852)
+@@ -0,0 +1,54 @@
++<!DOCTYPE html>
++<html lang="en">
++<head>
++    <meta charset="UTF-8" />
++    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
++    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
++    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style/register.css') }}">
++    <title>Fresh Market</title>
++</head>
++<body>
++    <div class="container">
++        <h1>Inventory Status</h1>
++        <form id="signin-form" action="inventory_analysis" method="POST">
++        <table class="bordered">
++            <thead>
++                <tr>
++                    <th>Store ID</th>
++                </tr>
++            </thead>
++            <tbody id="inputContainer">
++                <tr class="inputLine">
++                    <td>
++                        <label for="store_dropdown"></label>
++                        <select class="dropdown" name="store_dropdown"></select>
++                    </td>
++                </tr>
++            </tbody>
++        </table>
++        <input type="submit" value="Analysis">
++        <p>{{ src }}</p>
++        </form>
++    </div>
++
++    <script>
++        function fetchIDs(line) {
++            var store_dropdown = line.querySelector('.dropdown[name="store_dropdown"]');
++            fetch('/get_store_id')
++                .then(response => response.json())
++                .then(data => {
++                    var option = document.createElement('option');
++                    option.value = '0';
++                    option.text = "Select a Store";
++                    store_dropdown.add(option);
++                    data.forEach(function (item) {
++                        var option = document.createElement('option');
++                        option.value = item.store_id;
++                        option.text = item.store_id;
++                        store_dropdown.add(option);
++                    });
++                })
++        }
++    </script>
++</body>
++</html>
+\ No newline at end of file
