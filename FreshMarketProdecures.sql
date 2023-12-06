@@ -33,18 +33,15 @@ delimiter ;
 -- add new order
 DELIMITER $$
 
-CREATE PROCEDURE new_order(
+CREATE PROCEDURE check_new_orderID(
     IN orderID INT,
     IN orderDate DATE,
     IN custID INT,
     IN storeID INT,
-    IN prodName VARCHAR(255),
-    IN prodQuantity INT,
     OUT message VARCHAR(255)
 )
 BEGIN
     DECLARE existingOrder INT;
-    DECLARE prodID INT;
     
     -- Check if the orderID exists
     SELECT COUNT(*) INTO existingOrder FROM orders WHERE order_id = orderID;
@@ -53,20 +50,6 @@ BEGIN
     IF existingOrder = 0 THEN
         INSERT INTO orders(order_id, date, status, customer_id, store_id) 
         VALUES (orderID, orderDate, 'new', custID, storeID);
-        -- Get product_id from product name
-		SELECT product_id INTO prodID FROM product WHERE name = prodName;
-
-		-- Check if product exists
-		IF prodID IS NOT NULL THEN
-			-- Insert into order_products table
-			INSERT INTO order_products(order_id, product_id, product_quantity) 
-			VALUES (orderID, prodID, prodQuantity)
-			ON DUPLICATE KEY UPDATE product_quantity = product_quantity + prodQuantity;
-
-			SET message = 'Successfully received a new order';
-		ELSE
-			SET message = 'Failed to receive new order';
-		END IF;
 	ELSE
 		SIGNAL SQLSTATE '45000';
 		SET message = 'Order ID already exist';
@@ -74,6 +57,37 @@ BEGIN
 
 END$$
 
+
+DELIMITER ;
+
+-- update order_products table
+DELIMITER $$
+
+CREATE PROCEDURE update_order_products(
+    IN orderID INT,
+    IN prodName VARCHAR(255),
+    IN prodQuantity INT,
+    OUT message VARCHAR(255)
+)
+BEGIN
+    DECLARE prodID INT;
+
+	-- Get product_id from product name
+	SELECT product_id INTO prodID FROM product WHERE name = prodName;
+
+	-- Check if product exists
+	IF prodID IS NOT NULL THEN
+		-- Insert into order_products table
+		INSERT INTO order_products(order_id, product_id, product_quantity) 
+		VALUES (orderID, prodID, prodQuantity)
+		ON DUPLICATE KEY UPDATE product_quantity = product_quantity + prodQuantity;
+
+		SET message = 'Successfully received a new order';
+	ELSE
+		SET message = 'Failed to receive new order';
+	END IF;
+
+END$$
 DELIMITER ;
 
 -- fill new order
