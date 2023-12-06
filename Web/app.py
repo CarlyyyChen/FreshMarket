@@ -161,7 +161,7 @@ def submit_order():
         now_date = datetime.date.today()
         # Access the JSON data sent with the POST request
         data = request.json
-        print(data)
+        # print(data)
         # Insert the order details into the "order_detail" table
         conn = pymysql.connect(**db_config)
         cursor = conn.cursor()
@@ -174,8 +174,8 @@ def submit_order():
         cursor.close()
         conn.close()
         return jsonify({'success': True, 'message': 'Order submitted successfully'})
-    except pymysql.err.IntegrityError as e:
-        return jsonify({'success': False, 'message': str(e)})
+    except pymysql.err.OperationalError as e:
+        return jsonify({'success': False, 'message': 'Unable to submit order, order ID already exist.'})
 
 
 @app.route('/delivery')
