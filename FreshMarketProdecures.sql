@@ -53,6 +53,9 @@ BEGIN
     IF existingOrder = 0 THEN
         INSERT INTO orders(order_id, date, status, customer_id, store_id) 
         VALUES (orderID, orderDate, 'new', custID, storeID);
+	ELSE
+		SIGNAL SQLSTATE '45000';
+		SET message = 'Order ID already exist';
     END IF;
 
     -- Get product_id from product name
