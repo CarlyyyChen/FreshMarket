@@ -63,7 +63,7 @@ With the virtual environment activated, let’s install the required dependencie
 $ pip install flask
 $ pip install python-dotenv
 $ pip install pymysql
-$ python -m pip install pyecharts 
+$ pip install pyecharts 
 ```
 
 
