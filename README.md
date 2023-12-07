@@ -94,10 +94,14 @@ The "FreshMarket" project uses MySQL as the database. Before running the applica
 
 5. Running the Application
 
-To start the FreshMarket web application, run the following command:
+To start the FreshMarket web application, run one of the following commands:
 
 ```bash
 $ flask run 
+```
+
+```bash
+$ python app.py 
 ```
 ---
 
